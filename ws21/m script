@@ -1,1 +1,19 @@
 
+let
+    zdroj = Excel.CurrentWorkbook(){[Name="_dim_nuts"]}[Content],
+    #"odstraneni nadbytecnych sloupcu" = Table.RemoveColumns(zdroj,{"NUTS level 1", "NUTS level 3", "NUTS level", "Country order", "Region order"}),
+    #"nahrazeni prazdnych textu" = Table.ReplaceValue(#"odstraneni nadbytecnych sloupcu","",null,Replacer.ReplaceValue,{"Country",  "NUTS level 2"}),
+    #"doplneni null hodnot" = Table.FillDown(#"nahrazeni prazdnych textu",{"Country"}),
+    sloupce = Table.ColumnNames(#"doplneni null hodnot"),
+    // prejmenovava prvni sloupec (index nula) na hodnotu "kod"
+    #"prejmenovani sloupce" = Table.RenameColumns(#"doplneni null hodnot",{{sloupce{0},"Kod"}}),
+    #"filtrovani ceskych regionu" = Table.SelectRows(#"prejmenovani sloupce", each ([NUTS level 2] <> null and Text.Start([Kod],3)="CZ0") ),
+    #"extrahovani zeme pred lomitkem" = 
+    
+    try
+        Table.TransformColumns(#"filtrovani ceskych regionu", {{"Country", each Text.BeforeDelimiter(_, "/"), type text}})
+    otherwise
+        Table.TransformColumns(#"filtrovani ceskych regionu", {{"Zeme", each Text.BeforeDelimiter(_, "/"), type text}}),
+    #"odstraneni nadbytechnych mezer" = Table.TransformColumns(#"extrahovani zeme pred lomitkem",{{"Country", Text.Trim, type text}})
+in
+    #"odstraneni nadbytechnych mezer"
