@@ -1,0 +1,21 @@
+let
+    Source = Csv.Document(File.Contents(""),[Delimiter=",", Columns=10, Encoding=1250, QuoteStyle=QuoteStyle.None]),
+    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"DATAFLOW", type text}, {"LAST UPDATE", type datetime}, {"freq", type text}, {"unit", type text}, {"sex", type text}, {"age", type text}, {"geo", type text}, {"TIME_PERIOD", Int64.Type}, {"OBS_VALUE", Int64.Type}, {"OBS_FLAG", type text}}),
+    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"DATAFLOW", "LAST UPDATE", "freq", "OBS_FLAG", "unit"}),
+    #"Filtered Rows" = Table.SelectRows(#"Removed Columns", each ([age] <> "TOTAL" and [age] <> "UNK" and [age] <> "Y_OPEN")),
+    #"Filtered Rows1" = Table.SelectRows(#"Filtered Rows", each Text.StartsWith([geo], "CZ")),
+    #"Replaced Value" = Table.ReplaceValue(#"Filtered Rows1","Y","",Replacer.ReplaceText,{"age"}),
+    #"Replaced Value3" = Table.ReplaceValue(#"Replaced Value","_LT1","0",Replacer.ReplaceText,{"age"}),
+    #"Changed Type1" = Table.TransformColumnTypes(#"Replaced Value3",{{"age", Int64.Type}}),
+    #"Replaced Value1" = Table.ReplaceValue(#"Changed Type1","F","zeny",Replacer.ReplaceText,{"sex"}),
+    #"Replaced Value2" = Table.ReplaceValue(#"Replaced Value1","M","muzi",Replacer.ReplaceText,{"sex"}),
+    #"Renamed Columns" = Table.RenameColumns(#"Replaced Value2",{{"TIME_PERIOD", "rok"}, {"OBS_VALUE", "hodnota"}, {"sex", "pohlavi"}, {"age", "vek"}, {"geo", "oblast"}}),
+    #"Filtered Rows2" = Table.SelectRows(#"Renamed Columns", each ([oblast] <> "CZ" and [oblast] <> "CZ0" ) and ([pohlavi] <> "T")),
+    #"Inserted Date" = Table.AddColumn(#"Filtered Rows2", "datum", each Date.From(Text.From([rok], "cs-CZ")), type date),
+    #"Added Conditional Column" = Table.AddColumn(#"Inserted Date", "vekova skupina", each if [vek] <= 18 then "0-18" else if [vek] <= 65 then "19-65" else 66),
+    #"Changed Type2" = Table.TransformColumnTypes(#"Added Conditional Column",{{"vekova skupina", type text}}),
+    #"Inserted Year" = Table.AddColumn(#"Changed Type2", "Year", each Date.Year([datum]), Int64.Type),
+    #"Removed Columns1" = Table.RemoveColumns(#"Inserted Year",{"Year"})
+in
+    #"Removed Columns1"
