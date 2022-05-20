@@ -1,0 +1,83 @@
+
+
+Vypublikovaný report: https://app.powerbi.com/view?r=eyJrIjoiNTc0YmQ1OGEtNDUzOS00OTJhLWJmY2EtNDJkMzI1MjY4YWNhIiwidCI6IjU4NzNhNWVlLTkzNTYtNGYyMy04YzMyLTQ5ODRmYjE5ZmZmMyIsImMiOjh9
+
+====================================================================================
+01 cf max hodnota = 
+-- pojmenovane kody barev: https://www.jakpsatweb.cz/archiv/barvy-pojmenovane.html
+
+/*
+Pokud se suma nad sloupcem hodnota v danem roce rovna maximu ze souctu hodnot dle let, tak upravujeme vychozi barvu,
+jinak vracime vychozi barvu
+
+*/
+IF(
+    -- jaká je suma v daném roce
+    SUM(data[hodnota]) =
+    
+    maxx(
+    SUMMARIZE(
+        
+        ALLSELECTED(data)
+        
+        ,data[rok],"suma hodnota",SUM(data[hodnota])),[suma hodnota]),"firebrick")
+        
+
+02 cf maximalni hodnota = 
+if(
+    SUM(data[hodnota]) = 
+    maxx(
+    SUMMARIZE(
+        ALL(data[rok]),
+        data[rok],
+        "suma hodnota",
+        sum(data[hodnota])),[suma hodnota]),
+        
+      SUM(data[hodnota]),BLANK())
+      
+      
+      
+ 03 cf nazev grafu = 
+
+"Vyvoj hodnot v obdobi "&MIN(data[rok]) &" - "&MAX(data[rok])
+
+
+
+04 cf nazev grafu kontrola filtru = 
+
+SWITCH(
+    
+    TRUE(),
+    HASONEVALUE(data[vekova skupina]),
+    "Vývoj hodnoty věkové skupiny "&SELECTEDVALUE(data[vekova skupina]),
+    
+    DISTINCTCOUNT(data[vekova skupina]) = COUNTX(ALL(data[vekova skupina]),data[vekova skupina]),
+    "Vývoj hodnoty všech věkových skupin",
+    
+    ISFILTERED(data[vekova skupina]),
+    "Vývoj hodnoty věkových skupin "& CONCATENATEX(DISTINCT(data[vekova skupina]),data[vekova skupina],", "),
+"Vývoj hodnoty všech věkových skupin")
+ 
+ 
+ 
+ 
+ 
+ 05  cf barva tlacitka = 
+IF(HASONEVALUE(data[rok]),"green","tomato")
+
+
+
+06 cf podrobna analyza nadpis = 
+"Údaje pro rok "&SELECTEDVALUE(data[rok])
+
+
+
+
+07 cf text tlacitka = 
+IF(HASONEVALUE(data[rok]),"Přejít na detail roku "&SELECTEDVALUE(data[rok]), "Vyberte rok z grafu")
+
+
+
+
+08 barva pozadi sliceru = 
+if(ISFILTERED(data[vekova skupina]),"lightcyan","white")
