@@ -1,0 +1,77 @@
+import pandas as pd
+
+#Do proměnné df si uložíme Pandas dataframe z dokumentu dostupného na internetu, oddělovačem dat v dokumentu je středník.
+#K vytvoření dataframe použijeme metodu read_csv knihovny Pandas, jejímž prvním argumentem je umístění souboru.
+df = pd.read_csv(r'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZWHXbVznhPXISJJTnwbFqqdnnyCBvrY4j9e4CMN66s1ouUFnbEBsTlshmQ0FBLHDaOPNRln0pSLC_/pub?gid=237283572&single=true&output=csv',sep=';')
+
+# Metoda head() zpřístupní prvních 5 řádků dataframe
+print(df.head())
+
+# Metoda describe() poskytuje základní statistické údaje o dataframe, viz https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html
+print(df.describe())
+
+#Atribut dtypes zobrazí datové typy sloupců dataframe
+print(df.dtypes)
+
+# Protože sloupec [DATE] je datový typ objekt, tj. ne datum, je třeba jeho datový typ změnit, viz níže
+# Pokud před operátor "=" napíšeme jméno exitujícího sloupce, tak operací za operátorem měníme vlastnost tohoto existujícího sloupce
+df['DATE'] = pd.to_datetime(df['DATE'])
+
+# Pokud před operátor "=" napíšeme název neexistujícího sloupce, tak operací za operátorem vytváříme nový sloupec.
+
+# ================= VYTVOŘENÍ NOVÝCH SLOUPCŮ ===================================
+
+# Vytvoření nového sloupce ['ROK']
+df['ROK'] = df['DATE'].dt.year
+# Vytvoření nového sloupce['Mesic']
+df['MESIC'] = df['DATE'].dt.month
+
+# Vytvoření nového sloupce za použití hodnot již existujících sloupců při využití vektorizace
+df['ROZDIL TMAX TMIN'] = df['TMAX'] - df['TMIN']
+# Vytvoření nového sloupce za použití hodnot již existujících sloupců při využítí metody apply a lambda funkce
+df['ROZDIL TMAX TMIN2'] = df.apply(lambda x: x['TMAX'] - x['TMIN'],axis=1)
+
+# ================= VYTVOŘENÍ NOVÝCH SLOUPCŮ ===================================
+
+# ================= OMEZENÍ SLOUPCŮ SLOUPCŮ ===================================
+# Odstranění sloupce za pomoci metody drop(). Při práci nad celým dataframe je zpravidla nutné říct, jestli se orientujeme po řádcích (axis=0) nebo sloupcích (axis = 1)
+df = df.drop('STATION',axis=1)
+# Výběr pouze těch sloupců, se kterými chci nadále pracovat, tj. ve vnořených závorkách nezmíněné sloupce jsou smazány
+df = df[['DATE','TMAX','ROK','MESIC']]
+
+# ================= OMEZENÍ SLOUPCŮ SLOUPCŮ ===================================
+
+
+
+# ================= DOTAZ NA KONKRÉTNÍ ČÁST DATAFRAME =========================
+
+# V dataframe se umíme zeptat na konkrétní buňku, rozsah buněk, celý řádek či celý sloupec, a to za pomoci metod .loc a iloc
+
+# Za pomoci metody .loc se ptáme na konkrétní část dataframe dle toho, jak je tato část pojmenovaná, např. na názvy konkrétních sloupců
+print(f"Hodnoty na indexu s oznacenim 4: {df.loc[4]}")
+print(f"Hodnoty na patem radku:{df.iloc[4]}")
+print(f"Hodnota na indexu radku 4 ve sloupcich ROK a TMAX: {df.loc[4,['ROK','TMAX']]}")
+
+# Za pomoci metody .iloc se ptáme na konkrétní část dataframe dle jejího indexu, tj. zajímá nás řádek na konkrétní pozici a sloupec na konkrétní pozici bez ohledu na jejich název
+print(f"Hodnota na prvnich 5 radcich a prvncih 4 sloupcich {df.iloc[:4,:3]}")
+
+
+# Dataframe lze filtrovat podobně jako tabulky v Excel, kdy říkáme, který sloupec má splňovat jakou podmínku
+# Filtr dataframe na řádky, které mají ve sloupci ['ROK'] hodnotu 2020
+df = df[df['ROK']==2020]
+print('Dataset pro RUZYNE')
+print(df.head())
+
+# ================= DOTAZ NA KONKRÉTNÍ ČÁST DATAFRAME =========================
+
+
+# ================= KONTINGENČNÍ TABULKA  ===================================
+
+# Do proměnné df_pivot si uložíme kontingenční tabulku z dataframe v proměnné df. Na řádcích (index) budou hodnoty ze sloupce ['ROK'], ve sloupcích hodnoty ze sloupce ['MESIC'].
+# Na hodnoty ze sloupce ['TMAX'] budeme aplikovat funkci MAX()
+
+df_pivot = pd.pivot_table(df,values=['TMAX'],index=['ROK'],columns=['MESIC'],aggfunc = 'max')
+
+# ================= KONTINGENČNÍ TABULKA  ===================================
+
+
