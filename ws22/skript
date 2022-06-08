@@ -5,12 +5,15 @@ import pandas as pd
 df = pd.read_csv(r'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZWHXbVznhPXISJJTnwbFqqdnnyCBvrY4j9e4CMN66s1ouUFnbEBsTlshmQ0FBLHDaOPNRln0pSLC_/pub?gid=237283572&single=true&output=csv',sep=';')
 
 # Metoda head() zpřístupní prvních 5 řádků dataframe
+print('Prvních 5 řádků dataframe')
 print(df.head())
 
 # Metoda describe() poskytuje základní statistické údaje o dataframe, viz https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html
+print('\nZákladní statistické údaje')
 print(df.describe())
 
 #Atribut dtypes zobrazí datové typy sloupců dataframe
+print('\nDatové typy sloupců')
 print(df.dtypes)
 
 # Protože sloupec [DATE] je datový typ objekt, tj. ne datum, je třeba jeho datový typ změnit, viz níže
@@ -48,19 +51,19 @@ df = df[['DATE','TMAX','ROK','MESIC']]
 # V dataframe se umíme zeptat na konkrétní buňku, rozsah buněk, celý řádek či celý sloupec, a to za pomoci metod .loc a iloc
 
 # Za pomoci metody .loc se ptáme na konkrétní část dataframe dle toho, jak je tato část pojmenovaná, např. na názvy konkrétních sloupců
-print(f"Hodnoty na indexu s oznacenim 4: {df.loc[4]}")
-print(f"Hodnoty na patem radku:{df.iloc[4]}")
-print(f"Hodnota na indexu radku 4 ve sloupcich ROK a TMAX: {df.loc[4,['ROK','TMAX']]}")
+print(f"\nHodnoty na indexu s oznacenim 4: \n{df.loc[4]}")
+print(f"\nHodnoty na patem radku:\n{df.iloc[4]}")
+print(f"\nHodnota na indexu radku 4 ve sloupcich ROK a TMAX: \n{df.loc[4,['ROK','TMAX']]}")
 
 # Za pomoci metody .iloc se ptáme na konkrétní část dataframe dle jejího indexu, tj. zajímá nás řádek na konkrétní pozici a sloupec na konkrétní pozici bez ohledu na jejich název
-print(f"Hodnota na prvnich 5 radcich a prvncih 4 sloupcich {df.iloc[:4,:3]}")
+print(f"\nHodnota na prvnich 5 radcich a prvncih 4 sloupcich \n{df.iloc[:4,:3]}")
 
 
 # Dataframe lze filtrovat podobně jako tabulky v Excel, kdy říkáme, který sloupec má splňovat jakou podmínku
 # Filtr dataframe na řádky, které mají ve sloupci ['ROK'] hodnotu 2020
-df = df[df['ROK']==2020]
-print('Dataset pro RUZYNE')
-print(df.head())
+df_filtrovano = df[df['ROK']==2020]
+print('\nDataset pro RUZYNE')
+print(df_filtrovano.head())
 
 # ================= DOTAZ NA KONKRÉTNÍ ČÁST DATAFRAME =========================
 
@@ -69,9 +72,9 @@ print(df.head())
 
 # Do proměnné df_pivot si uložíme kontingenční tabulku z dataframe v proměnné df. Na řádcích (index) budou hodnoty ze sloupce ['ROK'], ve sloupcích hodnoty ze sloupce ['MESIC'].
 # Na hodnoty ze sloupce ['TMAX'] budeme aplikovat funkci MAX()
-
+print('\nKontingenční tabulka')
 df_pivot = pd.pivot_table(df,values=['TMAX'],index=['ROK'],columns=['MESIC'],aggfunc = 'max')
-
+print(df_pivot)
 # ================= KONTINGENČNÍ TABULKA  ===================================
 
 
