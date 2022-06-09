@@ -1,0 +1,24 @@
+import pandas as pd
+
+# Do proměnné df si uložíme Pandas dataframe z dokumentu dostupného na internetu, oddělovačem dat v dokumentu je středník.
+# K vytvoření dataframe použijeme metodu read_csv knihovny Pandas, jejímž prvním argumentem je umístění souboru.
+import pandas
+import re
+dataset = pandas.read_csv(r'https://docs.google.com/spreadsheets/d/e/2PACX-1vSZWHXbVznhPXISJJTnwbFqqdnnyCBvrY4j9e4CMN66s1ouUFnbEBsTlshmQ0FBLHDaOPNRln0pSLC_/pub?gid=237283572&single=true&output=csv',sep=';')
+dim_lokality = pandas.read_csv(r'https://docs.google.com/spreadsheets/d/e/2PACX-1vQikwVHQ0KE3armq7oDJtOXY4PPtckV8sEJgloVqnnR_VmHbu4eubWgfX9kki-xxFtCEnnf3D572FrA/pub?output=csv')
+def zjisti_lokalitu(lokalita):
+    shoda = re.search(r'[c]esk[o|a|á]',lokalita,re.IGNORECASE)
+    if shoda == None:
+        return 'cizina'
+    else:
+        return 'tuzemsko'
+
+dataset.columns = map(str.lower,dataset.columns)
+dim_lokality.columns = map(str.lower,dim_lokality.columns)
+
+dataset = dataset.merge(dim_lokality,how='left',left_on = 'name',right_on = 'lokalita')
+dataset['stanice kod'] = dataset['station'].str[:3]
+dataset['typ lokality'] = dataset['zeme'].apply(lambda x: zjisti_lokalitu(str(x)))
+dataset['typ srazek'] = pandas.cut(x=dataset['prcp'],bins=[-1,0,5,10,1000],labels=['neprselo','prselo malo','prselo stredne','prselo moc'])
+
+print(dataset.head())
