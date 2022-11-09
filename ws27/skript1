@@ -1,0 +1,35 @@
+#import knihoven, ktere potrebujeme pro beh aplikace
+import re
+import pandas as pd
+
+
+#nacteni dat z Excelu nahraneho na Google disk
+df_prehled = pd.read_excel(
+    #adresa souboru
+    'https://docs.google.com/spreadsheets/d/e/2PACX-1vRScaDSzLnTQcCEGQch8lFOeuDPEL9-5WCr58qubd5T3eiaisckNRCFScdET7OeMvUiQZo4nOJKWJJz/pub?output=xlsx'
+    #nazev listu
+    ,sheet_name='prehled'
+    #pocet radku, ktere se maji preskocit pri importu
+    ,skiprows=2)
+
+#prvni dva sloupce zustavaji katgoriemi, dalsi sloupce jsou, bez ohledu na jejich jmeno, prevedeny na radky, nove vznikle sloupce se jmenuji variable a value
+df_prehled = df_prehled.melt(id_vars=['id oddeleni','id zamestnance'],value_vars=df_prehled.columns[3:])
+
+#prevod hodnot ve sloupci value na cislo, pripadne chyby budou nahrazeny hodnotou NaN
+df_prehled['value'] = pd.to_numeric(df_prehled['value'],errors='coerce')
+#nahrazeni neciselnych hodnot nulou
+df_prehled['value'].fillna(0,inplace=True)
+
+#dopleni hodnot do prazdnych radku ve sloupci id oddeleni, doplnujeme tzv. zhora dolu 
+df_prehled['id oddeleni'].ffill(inplace=True)
+
+#print(df_prehled.head())
+
+#vytvoreni noveho dataframe, ve kterem jsou hodnoty sloupce variable prevedeny do radku
+df_prehled2 = df_prehled.pivot(index=['id oddeleni','id zamestnance'],columns=['variable'],values=['value'])
+#odstraneni multi-indexu na sloupcich
+df_prehled2.columns = df_prehled2.columns.droplevel(0)
+# uprava indexu na radcich
+df_prehled2 = df_prehled2.reset_index()
+
+print(df_prehled2)
