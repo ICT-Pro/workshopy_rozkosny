@@ -1,0 +1,79 @@
+import requests
+from bs4 import BeautifulSoup as bs
+import re
+import pandas as pd
+
+
+
+url = 'https://www.skoleni-ict.cz/kurz/Datova-analyza-v-Pythonu-PYDATA.aspx'
+
+
+r = requests.get(url)
+# kod odpovedi serveru. 200 = stranka je funkcni, 30. = stranka je presmerovana, 40. = stranka je nedostupna, 50. =  server je nedostupny
+status_code = r.status_code
+
+
+
+if status_code == 200:
+
+
+
+    obsah = bs(r.content,"html.parser")
+    #jedinecny element, titulek stranky
+    titulek = obsah.title.string
+    print('titulek :'+titulek)
+
+    #protoze stranka ma vice elementu meta, vyhledame je vsechny
+    meta_elementy = obsah.find_all('meta')
+    #prochazeni nalezenych elementu
+    for element in meta_elementy:
+      #hledame element s name rovnajici se description
+      if element.get('name') == 'description':
+        #uklademe si obsah elementu s nazvem description
+        meta_description = element.get('content')
+        print('meta description: '+ meta_description)
+
+
+  
+    terminy =  obsah.find_all(class_="navigace1")
+
+    print('---------------')
+    
+    kurzy = []
+    x = 0
+    for termin in terminy:
+
+      
+      #kurzy poradane v Brne obsahuji retezec TerminN_ctl01 v elementu id
+      #v zavislosti na tom priradime informaci o ucebne
+      ucebna = "brno" if "TerminN_ctl01" in str(termin) else "praha"
+      #za pomoci regularniho vyrazu hledame termin kurzu v ramci daneho elementu
+      datum = re.findall("[\d. -]{2,20}202.",str(termin))[0]
+      garantovany_termin  = True if "Garantovaný termín" in str(termin) else False
+      
+      data={}
+      data['ucebna'] = ucebna
+      data['datum'] = datum
+      data['garantovany termin'] = garantovany_termin
+    
+      data['url'] = url
+      kurzy.append(data)
+
+
+      x +=1
+
+    
+    dataframe = pd.DataFrame(kurzy)
+    print(dataframe)
+
+    #export dat do csv
+    dataframe.to_csv('kurzy.csv')
+
+    #export dat do xlsx
+    dataframe.to_excel('kurzy.xlsx')
+
+    
+
+
+
+
