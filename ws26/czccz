@@ -1,0 +1,21 @@
+import requests
+from bs4 import BeautifulSoup as bs
+import re
+
+#seznam prochazenych url
+urls = [ 
+    
+'https://www.czc.cz/apple-ochranny-obal-smart-folio-pro-ipad-pro-12-9-5-generace-cerna/316046/produkt'
+,'https://www.czc.cz/lenovo-tab-m10-plus-4gb-64gb-iron-grey/279348/produkt'
+,'https://www.czc.cz/fixed-poouzdro-se-stojankem-topic-tab-pro-lenovo-tab-m10-fhd-plus-cerna/323537/produkt'
+
+]
+for url in urls:
+  #dotaz na danou url
+  r = requests.get(url)
+  #parsovani obsahu odpovedi serveru
+  obsah = bs(r.content,"html.parser")
+
+  #definice regularniho vyrazu pro extrakci ceny
+  cena  = re.findall('price-vatin">(.*)?Kč',str(obsah))[0]
+  print(cena)
