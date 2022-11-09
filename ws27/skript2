@@ -1,0 +1,25 @@
+#import knihoven, ktere potrebujeme pro beh aplikace
+import re
+import pandas as pd
+
+#nacteni dat z Excelu nahraneho na Google disk
+df_komentare = pd.read_excel(
+    #adresa souboru
+    'https://docs.google.com/spreadsheets/d/e/2PACX-1vRScaDSzLnTQcCEGQch8lFOeuDPEL9-5WCr58qubd5T3eiaisckNRCFScdET7OeMvUiQZo4nOJKWJJz/pub?output=xlsx'
+    #nazev listu
+    ,sheet_name='komentare'
+  
+    )
+
+#extrahujeme ciselne hodnoty ze sloupce
+df_komentare['tel cislo'] = df_komentare['telefonni cislo'].apply(lambda x: re.findall(('\d'),str(x)))
+#extrahujeme poslednich 9 znaku od konce ze sloupce
+df_komentare['tel cislo2'] = df_komentare['tel cislo'].str[-9:]
+#spojujeme hodnoty do jednoho textoveho retezce
+df_komentare['tel cislo3'] = df_komentare['tel cislo2'].apply(lambda x: ''.join(x)) 
+#hledame text obsahujici vybranou sekvenci znaku
+df_komentare['prestavky'] = df_komentare['komentar'].apply(lambda x: re.findall('p[r|ř]est[a|á]v',str(x)))
+#kontrolujeme, jestli byla nalezena shoda, pokud ano, hodnota ve sloupci bude 1, jinak hodnota bude 0
+df_komentare['prestavky2'] = df_komentare['prestavky'].apply(lambda x: 1 if len(x)>0 else 0)
+
+print(df_komentare.head())
