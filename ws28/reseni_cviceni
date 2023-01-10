@@ -1,0 +1,5 @@
+# Bod 1
+print(df['TMIN'].corr(df['SNWD']))
+
+# Bod 2
+df.plot.scatter(x='TMAX',y='PRCP')
