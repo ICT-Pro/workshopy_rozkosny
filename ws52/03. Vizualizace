@@ -1,0 +1,5 @@
+Vytvoř executive summary. Chci 4 verze ze stejných dat:
+a) Pyramida (Minto): Hlavní závěr nahoře, podpůrné argumenty pod ním, data až dole.
+b) Storytelling with Data: Narativní formát — situace → komplikace → řešení, s jedním klíčovým grafem.
+c) Amazon 6-pager: Strukturovaný memo — kontext, zjištění, metriky, rizika, doporučení, přílohy.
+d) Interaktivní artefakt: React dashboard s filtry (rok, kraj, druh zeleniny) a 3 propojenými grafy.
